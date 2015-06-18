@@ -2658,7 +2658,7 @@ spawn()
                 fprintf(stderr, "99wm: exec %s", shell);
                 perror(" failed");
             }
-            execlp("urxvt", "urxvt -fg white -bg black", 0);
+            execlp("urxvt", "urxvt", "-fg", "white", "-bg", "black", 0);
             exit(1);
         }
         exit(0);
