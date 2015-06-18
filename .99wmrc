@@ -1,0 +1,11 @@
+--- browsers --
+iceweasel
+chromium
+--- system ----
+urxvt
+xfce4-terminal
+synaptic-pkexec
+--- desktop ---
+xcalc
+wmbattery
+xclock
