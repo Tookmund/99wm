@@ -1,33 +1,34 @@
-// licensed as w9wm 9wm
-// w9wm Version 0.4.2
-// Copyright 2000 Benjamin Drieu.
-
-// with large portions of code
-// Copyright 1994 David Hogan.
-
-// http://www.drieu.org/code/w9wm/README for original w9wm code
-// http://unauthorised.org/dhog/9wm.html for 9wm code
-
+// 99wm fork of X9wm Copyright 2015 Jacob Adams
+// Modernize build system
+// Remove launcher/run
+// Add improvements from latest x9wm
+//
+// X9wm fork Copyright 2013 Helmuth Schmelzer
+// Added two new workspaces
+// Added launcher/run, in this case gmrun, etc
+// Removed xoot warpper for aterm, aterm is not friend of utf-8 :/
+// Now for default urxvt is the default shell
+//
+// X9wm is Copyright 2005 Joseph Altea.
+// Built for slitaz linux trunk build ..
+// Xoot 0.1 LINUX system
+//
 // this version is single source file with a
 // red mouse pointer and smaller object file
 // for xoot, embedded, mini rescue builds...
 // x9wm single source file version with
 // additional code for forming, imaging, movies...
 //
-// X9wm is Copyright 2005 Joseph Altea.
-// Built for slitaz linux trunk build ..
-// Xoot 0.1 LINUX system
+// licensed as w9wm 9wm
+// w9wm Version 0.4.2
+// Copyright 2000 Benjamin Drieu.
 //
-// X9wm fork Copyright 2013 Helmuth Schmelzer 
-// Added two new workspaces
-// Added launcher/run, in this case gmrun, etc
-// Removed xoot warpper for aterm, aterm is not friend of utf-8 :/
-// Now for default urxvt is the default shell
+// with large portions of code
+// Copyright 1994 David Hogan.
 //
-// 99wm fork of X9wm Copyright 2015 Jacob Adams
-// Modernize build system
-// Remove launcher/run
-// Add improvements from latest x9wm
+// http://www.drieu.org/code/w9wm/README for original w9wm code
+// http://unauthorised.org/dhog/9wm.html for 9wm code
+
 
 #include <stdio.h>
 #include <signal.h>
@@ -945,7 +946,7 @@ parseprogsfile ()
   char * buffer;
 
   buffer = (char *) malloc (1024);
-  snprintf (buffer, 1024, "%s/.x9wmrc", p->pw_dir);
+  snprintf (buffer, 1024, "%s/.99wmrc", p->pw_dir);
 
   file = fopen (buffer, "r");
   if (! file)
@@ -2403,7 +2404,7 @@ Client *c;
 
 Client  *hiddenc[MAXHIDDEN];
 
-int numhidden;
+int numhidden = 0;
 int virtual = 0;
 
 Client * currents[NUMVIRTUALS] =
@@ -2627,7 +2628,7 @@ Client * c;
       int i;
 
       for (i = 0; i < numhidden; i++)
-	if (c == hiddenc[i]) 
+	if (c == hiddenc[i])
 	  break;
 
       if (i == numhidden)
