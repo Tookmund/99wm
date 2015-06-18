@@ -120,7 +120,7 @@ main(argc, argv)
 int argc;
 char    *argv[];
 {
-    int i, background, do_exit, do_restart, dummy;
+    int i, background, do_exit, do_restart;
     unsigned long mask;
     XEvent ev;
     XGCValues gv;
@@ -794,12 +794,10 @@ property(e)
 XPropertyEvent *e;
 {
     Atom a;
-    int delete;
     Client *c;
 
     /* we don't set curtime as nothing here uses it */
     a = e->atom;
-    delete = (e->state == PropertyDelete);
     c = getclient(e->window, 0);
     if (c == 0)
         return;
@@ -2318,7 +2316,7 @@ Atom a;
     return (char *)p;
 }
 
-int
+long
 get1prop(w, a, type)
 Window w;
 Atom a;
@@ -2330,7 +2328,7 @@ Atom type;
         return 0;
     x = *p;
     XFree((void*) p);
-    return (int)x;
+    return (long)x;
 }
 
 Window
@@ -2496,7 +2494,7 @@ XButtonEvent *e;
 		if (fork() == 0) {
 		  if (fork() == 0) {
 		    close(ConnectionNumber(dpy));
-		    execlp(progsnames[n], progsnames[n], 0);
+		    execlp(progsnames[n], progsnames[n], (char*)NULL);
 		    exit(1);
 		  }
 		  exit(0);
@@ -2655,11 +2653,11 @@ spawn()
         if (fork() == 0) {
             close(ConnectionNumber(dpy));
             if (termprog != NULL) {
-                execl(shell, shell, "-c", termprog, 0);
+                execl(shell, shell, "-c", termprog, (char*)NULL);
                 fprintf(stderr, "99wm: exec %s", shell);
                 perror(" failed");
             }
-            execlp("urxvt", "urxvt", "-fg", "white", "-bg", "black", 0);
+            execlp("urxvt", "urxvt", "-fg", "white", "-bg", "black", (char*)NULL);
             exit(1);
         }
         exit(0);
