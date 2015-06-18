@@ -1,9 +1,12 @@
-// licensed as w9wm 9wm 
+// licensed as w9wm 9wm
 // w9wm Version 0.4.2
 // Copyright 2000 Benjamin Drieu.
 
 // with large portions of code
 // Copyright 1994 David Hogan.
+
+// http://www.drieu.org/code/w9wm/README for original w9wm code
+// http://unauthorised.org/dhog/9wm.html for 9wm code
 
 // this version is single source file with a
 // red mouse pointer and smaller object file
@@ -24,13 +27,7 @@
 // 99wm fork of X9wm Copyright 2015 Jacob Adams
 // Modernize build system
 // Remove launcher/run
-// SEE http://www.drieu.org/code/w9wm/README
-// for original w9wm code 
-// and google plan 9 code for Dave Hogans 9wm 
-// SEE this for more info http://unauthorised.org/dhog/9wm.html
-// SEE www.skyfalcon.co.cc for x9wm development NEWS
-//
-//   www.skyfalcon.co.cc
+// Add improvements from latest x9wm
 
 #include <stdio.h>
 #include <signal.h>
@@ -50,25 +47,26 @@
 #include <X11/X.h>
 #include <X11/keysym.h>
 #include <X11/Xproto.h>
+#include "99wm.h"
 #include <unistd.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "99wm.h"
 
 #ifdef  DEBUG_EV
 #include "showevent/ShowEvent.c"
 #endif
 
-char    *version[] = 
+char    *version[] =
 {
-    "x9wm - a child of w9wm,9wm, fork of w9wm, etc", 
-    "copyright (c) Helmuth Schmelzer, Joseph Altea, Benjamin Drieu, David Hogan", 0,
+    "99wm - An easy to use distraction free window manager based on x9wm",
+    "copyright (c) Jacob Adams, Helmuth Schmelzer, Joseph Altea, Benjamin Drieu, David Hogan", 0,
 };
 
 Display         *dpy;
 int             screen;
 Window          root;
 Window          menuwin;
+
 Colormap        def_cmap;
 int             initting;
 GC              gc;
@@ -90,9 +88,9 @@ int             debug;
 int             signalled;
 Bool 		click_passes = 0;
 Bool		use_keys = 1;
-int		numvirtuals = 14;
-char *		progsnames[16];
 
+int		numvirtuals = MCOUNT;
+char *		progsnames[MCOUNT];
 Atom        exit_9wm;
 Atom        restart_9wm;
 Atom        wm_state;
@@ -170,10 +168,10 @@ char    *argv[];
         else if (strcmp(argv[i], "-virtuals") == 0 && i+1<argc)
 	  {
 	    int n = atoi(argv[++i]);
-	    if (n > 0 && n <= 14)
+	    if (n > 0 && n <= 12)
 	      numvirtuals = n;
 	    else
-	      fprintf(stderr, "9wm: wrong number of virtual screens, must be between 1 and 14\n");
+	      fprintf(stderr, "99wm: wrong number of virtual screens, must be between 1 and 12\n");
 	  }
         else if (argv[i][0] == '-')
             usage();
@@ -242,14 +240,14 @@ char    *argv[];
 
     if (fname != 0)
         if ((font = XLoadQueryFont(dpy, fname)) == 0)
-            fprintf(stderr, "9wm: warning: can't load font %s\n", fname);
+            fprintf(stderr, "99wm: warning: can't load font %s\n", fname);
 
     if (font == 0) {
         i = 0;
         for (;;) {
             fname = fontlist[i++];
             if (fname == 0) {
-                fprintf(stderr, "9wm: can't find a font\n");
+                fprintf(stderr, "99wm: can't find a font\n");
                 exit(1);
             }
             font = XLoadQueryFont(dpy, fname);
@@ -320,7 +318,7 @@ char    *argv[];
                 shapenotify((XShapeEvent *)&ev);
             else
 #endif
-                fprintf(stderr, "9wm: unknown ev.type %d\n", ev.type);
+                fprintf(stderr, "99wm: unknown ev.type %d\n", ev.type);
             break;
 	case KeyRelease:
 	  if (use_keys && current)
@@ -384,13 +382,13 @@ char    *argv[];
             property(&ev.xproperty);
             break;
         case SelectionClear:
-            fprintf(stderr, "9wm: SelectionClear (this should not happen)\n");
+            fprintf(stderr, "99wm: SelectionClear (this should not happen)\n");
             break;
         case SelectionNotify:
-            fprintf(stderr, "9wm: SelectionNotify (this should not happen)\n");
+            fprintf(stderr, "99wm: SelectionNotify (this should not happen)\n");
             break;
         case SelectionRequest:
-            fprintf(stderr, "9wm: SelectionRequest (this should not happen)\n");
+            fprintf(stderr, "99wm: SelectionRequest (this should not happen)\n");
             break;
         case EnterNotify:
             enter(&ev.xcrossing);
@@ -469,7 +467,7 @@ void
 usage()
 {
     fprintf(stderr, "usage: x9wm [[-display|-dpy] dpy] [-grey] [-version] [-font fname] [-pass]\n"
-"       [-nokeys] [-debug] [-nostalgia] [-term prog] [-pass] [-virtuals n]\n"
+"       [-nokeys] [-globalmenu] [-debug] [-nostalgia] [-term prog] [-pass] [-virtuals n]\n"
 "       [exit|restart]\n");
     exit(1);
 }
@@ -496,7 +494,7 @@ long x;
         mask = SubstructureRedirectMask;        /* magic! */
     status = XSendEvent(dpy, w, False, mask, &ev);
     if (status == 0)
-        fprintf(stderr, "9wm: sendcmessage failed\n");
+        fprintf(stderr, "99wm: sendcmessage failed\n");
 }
 
 Time
@@ -629,7 +627,7 @@ XMapRequestEvent *e;
     curtime = CurrentTime;
     c = getclient(e->window, 0);
     if (c == 0 || c->window != e->window) {
-        fprintf(stderr, "9wm: bogus mapreq %p %p\n", c, (void*)e->window);
+        fprintf(stderr, "99wm: bogus mapreq %p %p\n", c, (void*)e->window);
         return;
     }
 
@@ -742,10 +740,10 @@ XClientMessageEvent *e;
         exit(0);
     }
     if (e->window == root && e->message_type == restart_9wm) {
-        fprintf(stderr, "*** 9wm restarting ***\n");
+        fprintf(stderr, "*** 99wm restarting ***\n");
         cleanup();
         execvp(myargv[0], myargv);
-        perror("9wm: exec failed");
+        perror("99wm: exec failed");
         exit(1);
     }
     if (e->message_type == wm_change_state) {
@@ -755,11 +753,11 @@ XClientMessageEvent *e;
                 hide(c);
         }
         else
-            fprintf(stderr, "9wm: WM_CHANGE_STATE: format %d data %d w 0p%p\n",
+            fprintf(stderr, "99wm: WM_CHANGE_STATE: format %d data %d w 0p%p\n",
                 e->format, (int)e->data.l[0], (void*)e->window);
         return;
     }
-    fprintf(stderr, "9wm: strange ClientMessage, type 0x%x window 0x%x\n",
+    fprintf(stderr, "99wm: strange ClientMessage, type 0x%x window 0x%x\n",
         (int)e->message_type, (int)e->window);
 }
 
@@ -928,12 +926,12 @@ XEvent *e;
             return;
         }
         if (errno != EINTR || !signalled) {
-            perror("9wm: select failed");
+            perror("99wm: select failed");
             exit(1);
         }
     }
     cleanup();
-    fprintf(stderr, "9wm: exiting on signal\n");
+    fprintf(stderr, "99wm: exiting on signal\n");
     exit(1);
 }
 
@@ -957,7 +955,7 @@ parseprogsfile ()
       return;
     }
 
-  for (i = 0; i<16 && ! feof(file); i++)
+  for (i = 0; i< MCOUNT && ! feof(file); i++)
     {
       buffer = (char *) malloc (1024);
       if (! fgets(buffer, 1024, file))
@@ -1055,7 +1053,7 @@ Client *c;
     Client *cc;
 
     if (c == 0) {
-        fprintf(stderr, "9wm: active(c==0)\n");
+        fprintf(stderr, "99wm: active(c==0)\n");
         return;
     }
     if (c == current)
@@ -1371,7 +1369,7 @@ void
 fatal(s)
 char *s;
 {
-    fprintf(stderr, "9wm: ");
+    fprintf(stderr, "99wm: ");
     perror(s);
     fprintf(stderr, "\n");
     exit(1);
@@ -1385,7 +1383,7 @@ XErrorEvent *e;
     char msg[80], req[80], number[80];
 
     if (initting && (e->request_code == X_ChangeWindowAttributes) && (e->error_code == BadAccess)) {
-        fprintf(stderr, "9wm: it looks like there's already a window manager running;  9wm not started\n");
+        fprintf(stderr, "99wm: it looks like there's already a window manager running;  9wm not started\n");
         exit(1);
     }
 
@@ -1396,10 +1394,10 @@ XErrorEvent *e;
     sprintf(number, "%d", e->request_code);
     XGetErrorDatabaseText(d, "XRequest", number, "<unknown>", req, sizeof(req));
 
-    fprintf(stderr, "9wm: %s(0x%x): %s\n", req, (unsigned int)e->resourceid, msg);
+    fprintf(stderr, "99wm: %s(0x%x): %s\n", req, (unsigned int)e->resourceid, msg);
 
     if (initting) {
-        fprintf(stderr, "9wm: failure during initialisation; aborting\n");
+        fprintf(stderr, "99wm: failure during initialisation; aborting\n");
         exit(1);
     }
     return 0;
@@ -1428,10 +1426,10 @@ int err;
     case GrabSuccess:
         return;
     default:
-        fprintf(stderr, "9wm: %s: grab error: %d\n", f, err);
+        fprintf(stderr, "99wm: %s: grab error: %d\n", f, err);
         return;
     }
-    fprintf(stderr, "9wm: %s: grab error: %s\n", f, s);
+    fprintf(stderr, "99wm: %s: grab error: %s\n", f, s);
 }
 
 void
@@ -1618,7 +1616,7 @@ Menu * m;
         XMaskEvent(dpy, MenuMask, &ev);
         switch (ev.type) {
         default:
-            fprintf(stderr, "9wm: menuhit: unknown ev.type %d\n", ev.type);
+            fprintf(stderr, "99wm: menuhit: unknown ev.type %d\n", ev.type);
             break;
         case ButtonPress:
             break;
@@ -2155,7 +2153,7 @@ int invert;
     default:
 	dx = 0;
 	dy = 0;
-        fprintf(stderr, "9wm: bad window gravity %d for 0x%x\n", (int)gravity, (int)c->window);
+        fprintf(stderr, "99wm: bad window gravity %d for 0x%x\n", (int)gravity, (int)c->window);
     }
     dx += BORDER;
     dy += BORDER;
@@ -2489,8 +2487,7 @@ XButtonEvent *e;
 	    if (click_passes)
 	      XAllowEvents (dpy, ReplayPointer, curtime);
         }
-	else if ((e->state&(ShiftMask|ControlMask))==(ShiftMask|ControlMask)
-		 && progsnames[0] != NULL)
+	else if (progsnames[0] != NULL)
 	  {
 	    int n;
 	    if ((n = menuhit(e, &progs)) != -1)
@@ -2658,38 +2655,17 @@ spawn()
             close(ConnectionNumber(dpy));
             if (termprog != NULL) {
                 execl(shell, shell, "-c", termprog, 0);
-                fprintf(stderr, "9wm: exec %s", shell);
+                fprintf(stderr, "99wm: exec %s", shell);
                 perror(" failed");
             }
-            //execlp("xoot", "xoot", "-ut", 0);
-            execlp("urxvt", "urxvt", 0);
-            //execlp("aterm", "aterm", "-9wm", 0);
-            //perror("9wm: exec aterm/xterm failed");
+            execlp("urxvt", "urxvt -fg white -bg black", 0);
             exit(1);
         }
         exit(0);
     }
     wait((int *) 0);
 }
-void
-launcher()
-{
-    /*
-     * ugly dance to avoid leaving zombies.  Could use SIGCHLD,
-     * but it's not very portable, and I'm in a hurry...
-     * 9wm/w9wm/x9wm not have launcher/runner, gmrun is the launcher app :)
-     */
-    if (fork() == 0) {
-        if (fork() == 0) {
-            close(ConnectionNumber(dpy));
-            execlp("gmrun", "gmrun", 0);
-            perror("9wm: exec gmrun failed");
-            exit(1);
-        }
-        exit(0);
-    }
-    wait((int *) 0);
-}
+
 // where the placement takes place
 void
 reshape(c)
@@ -2747,7 +2723,7 @@ Client *c;
     if (c == 0 || numhidden == MAXHIDDEN)
         return;
     if (hidden(c)) {
-        fprintf(stderr, "9wm: already hidden: %s\n", c->label);
+        fprintf(stderr, "99wm: already hidden: %s\n", c->label);
         return;
     }
     XUnmapWindow(dpy, c->parent);
@@ -2770,12 +2746,12 @@ int map;
     int i;
 
     if (n >= numhidden) {
-        fprintf(stderr, "9wm: unhide: n %d numhidden %d\n", n, numhidden);
+        fprintf(stderr, "99wm: unhide: n %d numhidden %d\n", n, numhidden);
         return;
     }
     c = hiddenc[n];
     if (!hidden(c)) {
-        fprintf(stderr, "9wm: unhide: not hidden: %s(0x%lx)\n",
+        fprintf(stderr, "99wm: unhide: not hidden: %s(0x%lx)\n",
             c->label, c->window);
         return;
     }
@@ -2808,7 +2784,7 @@ int map;
             unhide(i, map);
             return;
         }
-    fprintf(stderr, "9wm: unhidec: not hidden: %s(0x%lx)\n",
+    fprintf(stderr, "99wm: unhidec: not hidden: %s(0x%lx)\n",
         c->label, c->window);
 }
 

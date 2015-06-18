@@ -212,3 +212,6 @@ void    showhints();
 /* cursor.c */
 void    initcurs();
 #define PATCHLEVEL 1
+
+/* Number of...something...Programs in menu I think */
+#define MCOUNT 46
