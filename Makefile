@@ -12,10 +12,10 @@ debug: ${FILES}
 	${CC} -Wall -g 99wm.c ${LIBS} -o debug
 
 uninstall:
-	rm ${DESTDIR}/${PROG}
+	rm -f ${DESTDIR}/${PROG}
 
 install: build
 	cp ${PROG} ${DESTDIR}/${PROG}
 
 clean:
-	rm ${PROG} debug
+	rm -f ${PROG} debug
