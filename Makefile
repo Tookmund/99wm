@@ -14,7 +14,7 @@ debug: ${FILES}
 uninstall:
 	rm -f ${DESTDIR}/${PROG}
 
-install: build
+install: 99wm
 	cp ${PROG} ${DESTDIR}/${PROG}
 
 clean:
