@@ -137,7 +137,7 @@ char    *argv[];
             nostalgia++;
         else if (strcmp(argv[i], "-debug") == 0)
             debug++;
-        else if ((strcmp(argv[i], "-display") == 0 || strcmp(argv[i], "-dpy") == 0 ) 
+        else if ((strcmp(argv[i], "-display") == 0 || strcmp(argv[i], "-dpy") == 0 )
 		 && i+1<argc)
 	  {
             display = argv[++i];
@@ -467,8 +467,8 @@ activatenext()
 void
 usage()
 {
-    fprintf(stderr, "usage: x9wm [[-display|-dpy] dpy] [-grey] [-version] [-font fname] [-pass]\n"
-"       [-nokeys] [-globalmenu] [-debug] [-nostalgia] [-term prog] [-pass] [-virtuals n]\n"
+    fprintf(stderr, "usage: 99wm [[-display|-dpy] dpy] [-grey] [-version] [-font fname] [-pass]\n"
+"       [-nokeys] [-debug] [-nostalgia] [-term prog] [-pass] [-virtuals n]\n"
 "       [exit|restart]\n");
     exit(1);
 }
@@ -1016,6 +1016,7 @@ int active;
 }
 
 #ifdef  DEBUG
+FILE* log = fopen("99wm.log","w"
 void
 dump_revert()
 {

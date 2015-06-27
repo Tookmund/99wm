@@ -5,17 +5,26 @@ DESTDIR := /usr/local/bin
 LIBS := -lX11 -lXext
 FILES := 99wm.c 99wm.h
 PROG := 99wm
+XSESSIONS := /usr/local/share/xsessions/
+
 99wm: ${FILES}
 	${CC} -O3 99wm.c ${LIBS} -o ${PROG}
 
 debug: ${FILES}
-	${CC} -Wall -g 99wm.c ${LIBS} -o debug
+	${CC} -Wall -g -D DEBUG 99wm.c ${LIBS} -o debug
+
+
+install: 99wm xsession
+	cp ${PROG} ${DESTDIR}/${PROG}
+
+.PHONY: uninstall clean xsession
 
 uninstall:
-	rm -f ${DESTDIR}/${PROG}
-
-install: 99wm
-	cp ${PROG} ${DESTDIR}/${PROG}
+	rm -f ${DESTDIR}/${PROG} ${XSESSIONS}/99wm.desktop
 
 clean:
 	rm -f ${PROG} debug
+
+xsession:
+	mkdir -p ${XSESSIONS}
+	cp 99wm.desktop ${XSESSIONS}
