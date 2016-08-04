@@ -1,3 +1,6 @@
+### Status: Complete
+**I recommend [9wm](https://github.com/nealey/9wm/) which I am now comaintainer of**
+
 x9wm - x window manager without windows
 
 Please see w9wm online and in several repositories.
